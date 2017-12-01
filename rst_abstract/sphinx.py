@@ -27,7 +27,8 @@
 
 from .builder import MetaBuilder
 from .nodes import *
-from .directives import AbstractDirective
+from .directives import *
+from .roles import *
 from .events import process_sections
 from docutils.nodes import SkipNode
 
@@ -45,9 +46,18 @@ def setup(app):
             latex=(visit_none, None),
             text=(visit_none, None),
             meta=(visit_abstract, depart_abstract))
+    app.add_node(
+            link_node,
+            html=(visit_link_html, depart_link_html),
+            latex=(visit_none, None),
+            text=(visit_none, None),
+            meta=(visit_none, None))
 
     # Add Directive
     app.add_directive('abstract', AbstractDirective)
+
+    # Add Role
+    app.add_role('link', link_role)
 
     # Add Events
     app.connect('doctree-resolved', process_sections)

@@ -26,7 +26,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 from .builder import MetaBuilder
-from .nodes import abstract_node
+from .nodes import abstract_node, link_node
 from docutils import nodes
 import json
 
@@ -117,7 +117,52 @@ def fetch_metadata(env, doctree):
 
     return meta
 
+# Traverse Links and Replace Content with Metadata
+def traverse_links(app, doctree, meta):
 
+    for link in doctree.traverse(link_node):
+        try:
+            data = meta[link.target]
+            content = data['title']
+            refdocname = data['docname']
+            refuri = app.builder.get_relative_uri(link.docname, data['docname'])
+            refuri += link.target
+            text = data['title']
+            title = data['abstract']
+        except:
+            content = link.target
+            refdocname = link.docname
+            refuri = ''
+            text = link.target
+            title = ''
+
+            print("Key Erorr: Link reference '%s' does not exist" % link.target)
+
+        link.content = content
+        link['refdocname'] = refdocname
+        link['refuri'] = refuri
+        link['title'] = title
+        link['text'] = text
+
+
+# Process Links
+def process_links(app, doctree, fromdocname):
+    
+    if not isinstance(app.builder, MetaBuilder):
+
+        path = app.builder.env.config.rstabstract_metadata
+
+        # Load Metadata
+        try:
+            with open(path, 'r') as f:
+                meta = json.load(f)
+
+        except:
+            print("\nUnable to load metadata for link roles")
+            meta = {}
+
+        traverse_links(app, doctree, meta)
+        
 # Process Sections 
 def process_sections(app, doctree, fromdocname):
     """ Event called after doctree-resolved, processes each
@@ -136,3 +181,8 @@ def process_sections(app, doctree, fromdocname):
         meta = fetch_metadata(env, doctree)
 
         setattr(env, 'rst_abstracts', meta)
+
+    else:
+        process_links(app, doctree, fromdocname)
+
+

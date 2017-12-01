@@ -24,44 +24,29 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from docutils import nodes
 
-# Skip Visitor
-def visit_none(self, node):
-    raise nodes.SkipNode
+from .nodes import *
+import re
 
+def link_role(name, rawtext, text, lineno, inliner, options={}, content={}):
 
-# Abstracts
-class abstract_node(nodes.Element):
-    pass
+    env = inliner.document.settings.env
+    docname = env.docname
 
-def visit_abstract(self, node):
-    pass
+    # Categorize Link
+    if re.match("^.*?<.*?>$", text):
+        div = re.split('<', text)
+        title = div[0]
+        idref = re.split('>', div[1])[0]
+    else:
+        title = text
+        idref = text
 
-def depart_abstract(self, node):
-    pass
+    # Set Node
+    node = link_node()
+    node.set_values(text, rawtext, title, idref, docname)
 
-# Links
-class link_node(nodes.Inline, nodes.Element):
-    content = None
-    docname = None
-    uri = None
-    title = None
-    text = None
-
-    def set_values(self, text, rawtext, title, target, docname):
-        self.text = text
-        self.rawtext = rawtext
-        self.title = title
-        self.target = target
-        self.docname = docname
+    return [node],[]
 
 
 
-def visit_link_html(self, node):
-    self.body.append('<a class="%s" href="%s" title="%s">%s' %
-            ("reference internal rstabstract", node['refuri'],
-                node['title'], node['text']))
-
-def depart_link_html(self, node):
-    self.body.append('</a>')
