@@ -24,32 +24,27 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
+from docutils.parsers.rst import Directive, directives
+from sphinx.util.console import darkgreen, bold
+from docutils import nodes
+from .nodes import abstract_node
 
-from .builder import MetaBuilder
-from .nodes import abstract_node, visit_abstract, depart_abstract
-from .directives import AbstractDirective
-from .events import process_sections
 
-# Configure App
-def setup(app):
-    """ Configures Sphinx to use new directive and builder """
+# Abstract Directive
+class AbstractDirective(Directive):
 
-    # Add Builder
-    app.add_builder(MetaBuilder)
+    has_content = True
+    required_arguments = 0
+    
 
-    # Add Nodes
-    app.add_node(
-            abstract_node,
-            html=(None, None),
-            latex=(None, None),
-            text=(None, None),
-            meta=(visit_abstract, depart_abstract))
+    def run(self):
+        if len(self.content) == 0:
+            return []
 
-    # Add Directive
-    app.add_directive('abstract', AbstractDirective)
+        node = abstract_node('\n'.join(self.content))
 
-    # Add Events
-    app.connect('doctree-resolved', process_sections)
+        self.state.nested_parse(self.content, self.content_offset, node)
 
-    # Add Configuration
-    app.add_config_value('rstabstract_metadata', 'metadata.json', True)
+        return [node]
+
+

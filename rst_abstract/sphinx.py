@@ -24,13 +24,33 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from docutils import nodes
 
-class abstract_node(nodes.Element):
-    pass
+from .builder import MetaBuilder
+from .nodes import *
+from .directives import AbstractDirective
+from .events import process_sections
+from docutils.nodes import SkipNode
 
-def visit_abstract(self, node):
-    pass
+# Configure App
+def setup(app):
+    """ Configures Sphinx to use new directive and builder """
 
-def depart_abstract(self, node):
-    pass
+    # Add Builder
+    app.add_builder(MetaBuilder)
+
+    # Add Nodes
+    app.add_node(
+            abstract_node,
+            html=(visit_none, None),
+            latex=(visit_none, None),
+            text=(visit_none, None),
+            meta=(visit_abstract, depart_abstract))
+
+    # Add Directive
+    app.add_directive('abstract', AbstractDirective)
+
+    # Add Events
+    app.connect('doctree-resolved', process_sections)
+
+    # Add Configuration
+    app.add_config_value('rstabstract_metadata', 'metadata.json', True)

@@ -47,7 +47,7 @@ def find_parent(node, target):
     instance.
     """
     try:
-        parent = nodes.parent
+        parent = node.parent
         if isinstance(parent, target):
             return parent
         else:
@@ -131,17 +131,8 @@ def process_sections(app, doctree, fromdocname):
     env = app.builder.env
     path = env.config.rstabstract_metadata
 
-    if not isinstance(app.builder, MetaBuilder):
-        print("Loading Metadata")
-
-        try:
-            with open(path, 'r') as f:
-                meta = json.load(f)
-        except:
-            meta = {}
-
-
-    else:
+    if isinstance(app.builder, MetaBuilder):
+        print("\nLoading metadata from doctree...")
         meta = fetch_metadata(env, doctree)
 
-    setattr(env, 'rst_abstracts', meta)
+        setattr(env, 'rst_abstracts', meta)

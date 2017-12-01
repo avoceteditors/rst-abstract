@@ -24,26 +24,16 @@
 # CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-from docutils.parsers.rst import Directive, directives
-from sphinx.util.console import darkgreen, bold
 from docutils import nodes
 
+class abstract_node(nodes.Element):
+    pass
 
-# Abstract Directive
-class AbstractDirective(Directive):
+def visit_abstract(self, node):
+    pass
 
-    has_content = True
-    required_arguments = 0
-    
+def depart_abstract(self, node):
+    pass
 
-    def run(self):
-        if len(self.content) == 0:
-            return []
-
-        node = abstract_node('\n'.join(self.content))
-
-        self.state.nested_parse(self.content, self.content_offset, node)
-
-        return [node]
-
-
+def visit_none(self, node):
+    raise nodes.SkipNode

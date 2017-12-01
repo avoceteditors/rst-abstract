@@ -79,18 +79,20 @@ class MetaBuilder(Builder):
         self.info("Done")
 
 
-	def finish():
-		if hasattr(self.env, "rst_abstracts"):
-			meta = self.env.rst_abstracts
 
-			import json
-			try:
-				with open(self.config.rstabstract_metadata) as f:
-					json.dump(meta, f)
-			except Exception as e:
-				self.warn(bold("Error: Unable to write metadata to %s" %
-					self.conf.rstabstract_metadata))
-				print(e)
+    def finish(self):
+        if hasattr(self.env, "rst_abstracts"):
+            meta = self.env.rst_abstracts
+
+            import json
+            try:
+                with open(self.config.rstabstract_metadata, 'w') as f:
+                    json.dump(meta, f)
+            except Exception as e:
+                self.warn(bold("Error: Unable to write metadata to %s" %
+                    self.config.rstabstract_metadata))
+                print(e)
+
 
 
 
